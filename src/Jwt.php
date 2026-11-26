@@ -478,7 +478,7 @@ class Jwt
     {
         $value = $this->jwt($key);
         if ($value === null || $value === '') {
-            throw new JwtException("Missing [{$key}] in config/melo-jwt.php.", 401000);
+            throw new JwtException("Missing [{$key}] in config/plugin/melo/jwt/app.php.", 401000);
         }
 
         $value = (string) $value;

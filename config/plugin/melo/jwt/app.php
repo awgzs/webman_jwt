@@ -5,8 +5,8 @@ declare(strict_types=1);
 /**
  * Melo JWT 配置模板
  *
- * 使用方式：把本文件复制到 Webman 应用的 config/ 目录下，
- * 即 config/melo-jwt.php，然后通过 config('melo-jwt') 读取。
+ * 使用方式：把本目录复制到 Webman 应用的 config/plugin/melo/ 目录下，
+ * 即 config/plugin/melo/jwt/app.php，然后通过 config('plugin.melo.jwt.app') 读取。
  *
  * 秘钥占位符会在首次使用时自动生成 64 位随机值并写回本文件。
  */

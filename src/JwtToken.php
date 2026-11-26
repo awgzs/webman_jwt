@@ -9,7 +9,7 @@ use Melo\Jwt\Exception\JwtException;
 /**
  * JWT 静态门面（对齐 tinywan/webman-jwt 风格）。
  *
- * 所有方法委托给核心 Jwt 实例，配置从 config('melo-jwt') 加载，
+ * 所有方法委托给核心 Jwt 实例，配置从 config('plugin.melo.jwt.app') 加载，
  * 秘钥占位符在首次使用时自动生成。
  */
 final class JwtToken

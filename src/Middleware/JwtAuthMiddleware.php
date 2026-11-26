@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Melo\Jwt\Middleware;
 
 use Closure;
+use Melo\Jwt\ConfigLoader;
 use Melo\Jwt\Exception\JwtException;
 use Melo\Jwt\Exception\TokenMissingException;
 use Melo\Jwt\Jwt;
@@ -128,12 +129,6 @@ class JwtAuthMiddleware
 
     private function config(): array
     {
-        if (function_exists('config')) {
-            $config = config('melo-jwt');
-            if (is_array($config)) {
-                return $config;
-            }
-        }
-        return [];
+        return ConfigLoader::load();
     }
 }

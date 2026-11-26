@@ -29,13 +29,13 @@ final class ConfigLoader
     private static function read(): array
     {
         if (function_exists('config')) {
-            $config = config('melo-jwt');
+            $config = config('plugin.melo.jwt.app');
             if (is_array($config) && $config !== []) {
                 return $config;
             }
         }
 
-        $file = dirname(__DIR__) . '/config/melo-jwt.php';
+        $file = dirname(__DIR__) . '/config/plugin/melo/jwt/app.php';
         if (is_file($file)) {
             $config = require $file;
             if (is_array($config)) {
@@ -102,7 +102,23 @@ final class ConfigLoader
     private static function persist(array $replacements): void
     {
         $file = self::configFile();
-        if ($file === null || !is_file($file) || !is_writable($file)) {
+        if ($file === null) {
+            return;
+        }
+
+        // 应用侧尚未复制配置模板时，自动创建目录并写入一份模板再替换秘钥
+        if (!is_file($file)) {
+            $dir = dirname($file);
+            if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {
+                return;
+            }
+            $template = dirname(__DIR__) . '/config/plugin/melo/jwt/app.php';
+            if (!is_file($template) || !copy($template, $file)) {
+                return;
+            }
+        }
+
+        if (!is_writable($file)) {
             return;
         }
 
@@ -120,13 +136,13 @@ final class ConfigLoader
     private static function configFile(): ?string
     {
         if (function_exists('config_path')) {
-            $path = config_path('melo-jwt.php');
+            $path = config_path('plugin/melo/jwt/app.php');
             if (is_string($path)) {
                 return $path;
             }
         }
         if (function_exists('base_path')) {
-            return base_path('config/melo-jwt.php');
+            return base_path('config/plugin/melo/jwt/app.php');
         }
         return null;
     }
