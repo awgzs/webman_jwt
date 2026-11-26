@@ -13,7 +13,7 @@ if (!function_exists('Jwt')) {
 }
 
 if (!function_exists('JwtToken')) {
-    /** @return array{token_type: string, expires_in: int, access_token: string, refresh_token?: string} */
+    /** @return array{token_type: string, expires_in: int, access_token: string, refresh_token?: string, refresh_expires_in?: int} */
     function JwtToken(array $extend, ?int $accessExp = null, ?int $refreshExp = null): array
     {
         return \Melo\Jwt\JwtToken::generateToken($extend, $accessExp, $refreshExp);
@@ -33,7 +33,7 @@ if (!function_exists('JwtVerify')) {
 }
 
 if (!function_exists('JwtRefresh')) {
-    /** @return array{token_type: string, expires_in: int, access_token: string, refresh_token?: string} */
+    /** @return array{token_type: string, expires_in: int, access_token: string, refresh_token?: string, refresh_expires_in?: int} */
     function JwtRefresh(?string $refreshToken = null, array &$extend = []): array
     {
         return \Melo\Jwt\JwtToken::refreshToken($refreshToken, $extend);

@@ -26,7 +26,7 @@ final class JwtToken
      * @param array    $extend      业务字段，必须含配置的 id 字段（默认 id）
      * @param int|null $accessExp   覆盖 access 有效期
      * @param int|null $refreshExp  覆盖 refresh 有效期
-     * @return array{token_type: string, expires_in: int, access_token: string, refresh_token?: string}
+     * @return array{token_type: string, expires_in: int, access_token: string, refresh_token?: string, refresh_expires_in?: int}
      */
     public static function generateToken(array $extend, ?int $accessExp = null, ?int $refreshExp = null): array
     {
@@ -55,7 +55,7 @@ final class JwtToken
 
     /**
      * @param array $extend 引用返回业务字段
-     * @return array{token_type: string, expires_in: int, access_token: string, refresh_token?: string}
+     * @return array{token_type: string, expires_in: int, access_token: string, refresh_token?: string, refresh_expires_in?: int}
      */
     public static function refreshToken(?string $refreshToken = null, array &$extend = []): array
     {

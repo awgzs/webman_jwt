@@ -2,7 +2,7 @@
 
 基于 `firebase/php-jwt` 的 JWT 认证 Composer 包，专为 Webman / Workerman 设计。
 
-- 统一签发 `generateToken()`：一次返回 access + refresh，双密钥独立
+- 统一签发 `generateToken()`：一次返回 access + refresh（及各有效期），双密钥独立
 - 业务字段统一收进 `extend`，支持 `iss` / `aud` / `nbf` / `leeway`
 - 安装时秘钥占位符**自动生成 64 位随机值并写回配置**
 - 单设备登录（Redis / MySQL ThinkORM）：同用户同客户端只保留一个有效会话
@@ -36,7 +36,7 @@ $tokens = JwtToken::generateToken([
     'email' => 'melo@example.com',
     'client' => JwtToken::TOKEN_CLIENT_WEB,
 ]);
-// ['token_type'=>'Bearer', 'expires_in'=>7200, 'access_token'=>'...', 'refresh_token'=>'...']
+// ['token_type'=>'Bearer', 'expires_in'=>7200, 'access_token'=>'...', 'refresh_token'=>'...', 'refresh_expires_in'=>604800]
 
 $tokens = JwtToken::generateToken(['id' => 1001], 3600, 604800); // 单次覆盖有效期
 ```

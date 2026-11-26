@@ -46,7 +46,7 @@ class Jwt
      * @param array    $extend      业务字段（含 id / client 时纳入单设备登录）
      * @param int|null $accessExp   覆盖 access 有效期
      * @param int|null $refreshExp  覆盖 refresh 有效期
-     * @return array{token_type: string, expires_in: int, access_token: string, refresh_token?: string}
+     * @return array{token_type: string, expires_in: int, access_token: string, refresh_token?: string, refresh_expires_in?: int}
      */
     public function encode(array $extend, ?int $accessExp = null, ?int $refreshExp = null): array
     {
@@ -62,6 +62,7 @@ class Jwt
 
         if (!$this->refreshDisabled()) {
             $tokens['refresh_token'] = $this->issue($extend, $refreshExp, $jti, self::TYPE_REFRESH);
+            $tokens['refresh_expires_in'] = $refreshExp;
         }
 
         $this->registerSso($extend, $jti, max($accessExp, $refreshExp));
@@ -149,7 +150,7 @@ class Jwt
     /**
      * @param string|null $refreshToken 不传则从请求头获取
      * @param array       $extend       引用返回业务字段
-     * @return array{token_type: string, expires_in: int, access_token: string, refresh_token?: string}
+     * @return array{token_type: string, expires_in: int, access_token: string, refresh_token?: string, refresh_expires_in?: int}
      */
     public function refreshToken(?string $refreshToken = null, array &$extend = []): array
     {
@@ -168,6 +169,7 @@ class Jwt
 
         if (!$this->refreshDisabled()) {
             $tokens['refresh_token'] = $this->issue($extend, $refreshExp, $jti, self::TYPE_REFRESH);
+            $tokens['refresh_expires_in'] = $refreshExp;
         }
 
         $this->registerSso($extend, $jti, max($accessExp, $refreshExp));

@@ -33,7 +33,7 @@ return [
         // refresh token 秘钥（必须与 access 不同）。占位符同样自动生成
         'refresh_secret_key' => '__MELO_JWT_REFRESH_SECRET__',
 
-        // refresh token 有效期（秒）
+        // refresh token 有效期（秒），签发结果中以 refresh_expires_in 返回
         'refresh_exp' => 604800,
 
         // 是否禁用 refresh token
