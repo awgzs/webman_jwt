@@ -4,11 +4,7 @@ declare(strict_types=1);
 
 namespace Melo\Jwt;
 
-/**
- * JWT 静态门面（兼容层）。
- *
- * 推荐直接使用 JwtToken；本类保留以便已有代码平滑迁移。
- */
+/** 兼容层，推荐直接使用 JwtToken。 */
 final class Facade
 {
     public static function manager(): JwtManager

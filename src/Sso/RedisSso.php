@@ -6,12 +6,7 @@ namespace Melo\Jwt\Sso;
 
 use Melo\Jwt\Exception\JwtException;
 
-/**
- * 基于 Redis 的单点登录存储。
- *
- * key 结构为 prefix + md5(userId) + ':' + md5(deviceType)，value 为当前有效 jti，
- * 通过 EXPIRE 自动过期。分段设计使 logoutAll 可按用户前缀 SCAN 并删除全部设备。
- */
+/** key 为 prefix+md5(userId)+':'+md5(deviceType)，分段设计便于 logoutAll 按前缀 SCAN。 */
 class RedisSso implements SsoInterface
 {
     private array $config;

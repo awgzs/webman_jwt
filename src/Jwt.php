@@ -18,12 +18,7 @@ use Melo\Jwt\Exception\TokenKickedException;
 use Melo\Jwt\Exception\TokenMissingException;
 use Melo\Jwt\Sso\SsoInterface;
 
-/**
- * JWT 核心服务：统一签发（access + refresh）、校验、刷新、撤销与单点登录。
- *
- * 载荷结构与 tinywan/webman-jwt 对齐：业务字段统一放在 extend 中，
- * 标准字段为 iss / aud / iat / nbf / exp / jti，类型由 type 声明区分。
- */
+/** 载荷：业务字段放 extend，标准字段 iss/aud/iat/nbf/exp/jti，type 区分令牌类型。 */
 class Jwt
 {
     public const ACCESS_TOKEN = 1;
@@ -48,8 +43,6 @@ class Jwt
     }
 
     /**
-     * 统一签发：一次返回 access_token + refresh_token。
-     *
      * @param array    $extend      业务字段（含 id / client 时纳入单设备登录）
      * @param int|null $accessExp   覆盖 access 有效期
      * @param int|null $refreshExp  覆盖 refresh 有效期
@@ -76,9 +69,6 @@ class Jwt
         return $tokens;
     }
 
-    /**
-     * 底层签发：把业务字段收进 extend，写入标准声明与类型声明。
-     */
     private function issue(array $extend, int $exp, string $jti, string $type): string
     {
         $now = time();
@@ -108,11 +98,7 @@ class Jwt
         }
     }
 
-    /**
-     * 校验 token。未传 token 时从请求头获取。
-     *
-     * @return array{iss: string, aud: string, iat: int, nbf: int, exp: int, jti: string, type: string, extend: array}
-     */
+    /** @return array{iss: string, aud: string, iat: int, nbf: int, exp: int, jti: string, type: string, extend: array} */
     public function verify(int $tokenType = self::ACCESS_TOKEN, ?string $token = null, bool $checkState = true): array
     {
         $token ??= $this->getTokenFromHeaders();
@@ -161,8 +147,6 @@ class Jwt
     }
 
     /**
-     * 用 refresh token 换取新令牌（默认轮换）。
-     *
      * @param string|null $refreshToken 不传则从请求头获取
      * @param array       $extend       引用返回业务字段
      * @return array{token_type: string, expires_in: int, access_token: string, refresh_token?: string}
@@ -191,9 +175,7 @@ class Jwt
         return $tokens;
     }
 
-    /**
-     * 登出：只需要用户ID；不传客户端类型则退出该用户全部设备。
-     */
+    /** 不传 client 则退出该用户全部设备。 */
     public function clear(string|int $userId, ?string $client = null): void
     {
         if ($this->sso === null) {
@@ -212,51 +194,33 @@ class Jwt
         $this->sso->logout($userId, $client);
     }
 
-    /**
-     * 获取当前 token 的业务字段
-     */
     public function getExtend(?string $token = null): array
     {
         return (array) ($this->verify(self::ACCESS_TOKEN, $token)['extend'] ?? []);
     }
 
-    /**
-     * 获取指定业务字段
-     */
     public function getExtendVal(string $key, mixed $default = '', ?string $token = null): mixed
     {
         return $this->getExtend($token)[$key] ?? $default;
     }
 
-    /**
-     * 获取当前登录用户ID
-     */
     public function getCurrentId(?string $token = null): int|string
     {
         $id = $this->getExtendVal($this->idField, '', $token);
         return (is_int($id) || is_string($id)) ? $id : 0;
     }
 
-    /**
-     * 获取 token 剩余有效期（秒）
-     */
     public function getTokenExp(int $tokenType = self::ACCESS_TOKEN, ?string $token = null): int
     {
         return (int) ($this->verify($tokenType, $token)['exp'] ?? 0) - time();
     }
 
-    /**
-     * 通过配置的 user_model 回调获取当前用户
-     */
     public function getUser(?string $token = null): mixed
     {
         $userModel = $this->jwt('user_model');
         return is_callable($userModel) ? $userModel($this->getCurrentId($token)) : [];
     }
 
-    /**
-     * 校验有效性，不抛异常
-     */
     public function verifyTokenSafe(string $token, int $tokenType = self::ACCESS_TOKEN): bool
     {
         try {
@@ -267,9 +231,7 @@ class Jwt
         }
     }
 
-    /**
-     * 只解析载荷不验签（仅用于读取 exp / jti，勿用于鉴权）
-     */
+    /** 只解析载荷不验签，勿用于鉴权。 */
     public function claims(string $token): array
     {
         $parts = explode('.', $token);
@@ -284,9 +246,7 @@ class Jwt
         return $payload;
     }
 
-    /**
-     * 撤销单个 token（需开启黑名单）
-     */
+    /** 需开启黑名单。 */
     public function invalidate(string $token): void
     {
         if ($this->blacklist === null) {
@@ -334,9 +294,7 @@ class Jwt
         $this->sso = $sso;
     }
 
-    /**
-     * 从请求头获取 token。支持配置是否允许 GET 参数兜底。
-     */
+    /** 支持配置是否允许 GET 参数兜底。 */
     private function getTokenFromHeaders(): string
     {
         if (!function_exists('request')) {

@@ -6,12 +6,7 @@ namespace Melo\Jwt\Sso;
 
 use Melo\Jwt\Exception\JwtException;
 
-/**
- * 基于 ThinkORM（think\facade\Db）的单点登录存储。
- *
- * 依赖可选的 topthink/think-orm，包本身不强制安装。
- * 使用前需按 README 中的 SQL 建立数据表。
- */
+/** 依赖可选的 topthink/think-orm，表结构见 README。 */
 class ThinkOrmSso implements SsoInterface
 {
     private string $table;

@@ -12,9 +12,6 @@ use Melo\Jwt\Sso\RedisSso;
 use Melo\Jwt\Sso\SsoInterface;
 use Melo\Jwt\Sso\ThinkOrmSso;
 
-/**
- * JWT 管理器：按配置创建并缓存核心服务实例。
- */
 class JwtManager
 {
     private array $config;
@@ -25,9 +22,7 @@ class JwtManager
         $this->config = $config;
     }
 
-    /**
-     * 获取核心 Jwt 实例（单例）。guard 参数保留仅为兼容，配置统一从 jwt 段读取。
-     */
+    /** guard 参数仅为兼容保留，配置统一从 jwt 段读取。 */
     public function guard(?string $name = null): Jwt
     {
         if ($this->instance === null) {
@@ -45,9 +40,7 @@ class JwtManager
         $this->instance = null;
     }
 
-    /**
-     * 读取配置，支持点号访问；不传 key 返回全部配置。
-     */
+    /** 支持点号访问；不传 key 返回全部配置。 */
     public function config(?string $key = null, mixed $default = null): mixed
     {
         if ($key === null) {

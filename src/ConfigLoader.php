@@ -6,12 +6,6 @@ namespace Melo\Jwt;
 
 use Melo\Jwt\Exception\JwtException;
 
-/**
- * 配置加载与秘钥惰性生成。
- *
- * 首次加载配置时，若 access_secret_key / refresh_secret_key 仍为占位符，
- * 自动生成 64 位随机秘钥并写回应用配置文件（保留注释与格式）。
- */
 final class ConfigLoader
 {
     private const ACCESS_PLACEHOLDER = '__MELO_JWT_ACCESS_SECRET__';
@@ -63,7 +57,6 @@ final class ConfigLoader
             return $config;
         }
 
-        // 进程内复用已生成秘钥，避免重复加载时反复替换
         if (!isset(self::$generated['access'])) {
             self::$generated['access'] = self::generateSecret();
             self::$generated['refresh'] = self::generateSecret();
@@ -96,9 +89,7 @@ final class ConfigLoader
         }
     }
 
-    /**
-     * 把生成的秘钥写回应用配置文件。找不到应用配置路径时仅保留在内存中。
-     */
+    /** 找不到应用配置路径时仅保留在内存中。 */
     private static function persist(array $replacements): void
     {
         $file = self::configFile();
@@ -106,7 +97,6 @@ final class ConfigLoader
             return;
         }
 
-        // 应用侧尚未复制配置模板时，自动创建目录并写入一份模板再替换秘钥
         if (!is_file($file)) {
             $dir = dirname($file);
             if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {

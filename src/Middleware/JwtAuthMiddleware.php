@@ -13,16 +13,7 @@ use Melo\Jwt\JwtToken;
 use Webman\Http\Request;
 use Webman\Http\Response;
 
-/**
- * JWT 认证中间件。
- *
- * 在 config/middleware.php 中注册：
- *   '' => [ \Melo\Jwt\Middleware\JwtAuthMiddleware::class ],
- *
- * 认证成功后，载荷会写入请求上下文：
- *   - $request->jwtClaims = [...]
- *   - context('jwt.claims', [...])（Webman 协程上下文）
- */
+/** 认证成功后载荷写入 $request->jwtClaims 与 context('jwt.claims')。 */
 class JwtAuthMiddleware
 {
     public function process(Request $request, Closure $next): Response
@@ -53,9 +44,7 @@ class JwtAuthMiddleware
         return $next($request);
     }
 
-    /**
-     * 提取 token：优先取请求对象上显式传入的 token，其次取请求头。
-     */
+    /** 优先取请求对象上显式传入的 token，其次取请求头。 */
     private function extractToken(Request $request, array $tokenConfig): ?string
     {
         $passed = $request->jwtToken ?? null;
@@ -81,9 +70,7 @@ class JwtAuthMiddleware
         return trim($value);
     }
 
-    /**
-     * 路径白名单匹配：支持完整路径与以 * 结尾的前缀
-     */
+    /** 支持完整路径与以 * 结尾的前缀。 */
     private function isWhitelisted(string $path, array $whitelist): bool
     {
         foreach ($whitelist as $pattern) {
@@ -101,9 +88,6 @@ class JwtAuthMiddleware
         return false;
     }
 
-    /**
-     * 构造统一的 401 响应
-     */
     private function fail(array $config, string $message, int $code = 0): Response
     {
         $exceptionConfig = $config['exception'] ?? [];

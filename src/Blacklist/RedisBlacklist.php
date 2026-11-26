@@ -6,9 +6,6 @@ namespace Melo\Jwt\Blacklist;
 
 use Melo\Jwt\Exception\JwtException;
 
-/**
- * 基于 Redis 的黑名单，适用于多进程 / 多机部署。
- */
 class RedisBlacklist implements BlacklistInterface
 {
     private array $config;
