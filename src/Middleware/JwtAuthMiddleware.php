@@ -99,14 +99,14 @@ class JwtAuthMiddleware
 
         $body = $exceptionConfig['response'] ?? [
             'code' => $status,
-            'message' => '{message}',
+            'msg' => '{msg}',
             'data' => null,
         ];
         $body = is_array($body) ? $body : [];
         if ($code > 0) {
             $body['code'] = $code;
         }
-        $body['message'] = str_replace('{message}', $message, (string) ($body['message'] ?? '{message}'));
+        $body['msg'] = str_replace('{msg}', $message, (string) ($body['msg'] ?? '{msg}'));
 
         return json($body, $status);
     }

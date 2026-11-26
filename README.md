@@ -111,7 +111,7 @@ JwtClaims('uid');         // 辅助函数读取（extend 中字段名默认为 i
 认证失败返回统一 JSON 响应（默认 HTTP 401）：
 
 ```json
-{ "code": 401013, "message": "身份验证会话已过期，请重新登录！", "data": null }
+{ "code": 401013, "msg": "身份验证会话已过期，请重新登录！", "data": null }
 ```
 
 ## 单设备登录（SSO）

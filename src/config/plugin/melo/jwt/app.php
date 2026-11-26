@@ -122,7 +122,7 @@ return [
         'status' => 401,
         'response' => [
             'code' => 401,
-            'message' => '{message}',
+            'msg' => '{msg}',
             'data' => null,
         ],
         'log' => true,
