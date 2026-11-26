@@ -17,6 +17,7 @@ class Install
     public static function install(): void
     {
         static::installByRelation();
+        ConfigLoader::generateSecrets();
     }
 
     public static function uninstall(): void

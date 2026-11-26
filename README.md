@@ -4,7 +4,7 @@
 
 - 统一签发 `generateToken()`：一次返回 access + refresh，双密钥独立
 - 业务字段统一收进 `extend`，支持 `iss` / `aud` / `nbf` / `leeway`
-- 秘钥占位符首次使用时**自动生成 64 位随机值并写回配置**
+- 安装时秘钥占位符**自动生成 64 位随机值并写回配置**
 - 单设备登录（Redis / MySQL ThinkORM）：同用户同客户端只保留一个有效会话
 - 分层异常 + tinywan 风格错误码（401011 / 401013 / 401021 ...）
 - Webman 认证中间件，仅从请求头取 token
@@ -16,11 +16,11 @@
 composer require melo/jwt
 ```
 
-webman 会自动复制配置模板到 `config/plugin/melo/jwt/app.php`，已存在的文件不覆盖。
+webman 会自动复制配置模板到 `config/plugin/melo/jwt/app.php`，已存在的文件不覆盖，并把秘钥占位符替换为随机值写回。已生成的秘钥不会被覆盖。
 
 ## 配置
 
-秘钥占位符首次加载时自动生成并写回 `config/plugin/melo/jwt/app.php`；非 webman 环境首次使用也会自动创建目录与配置文件。
+若模板未被复制（如非 webman 环境），秘钥占位符会在首次使用时自动生成并写回 `config/plugin/melo/jwt/app.php`。
 
 > 密钥长度要求（firebase/php-jwt v7）：HS256 ≥ 32 字节、HS384 ≥ 48 字节、HS512 ≥ 64 字节。
 

@@ -20,6 +20,30 @@ final class ConfigLoader
         return self::resolveSecrets($config);
     }
 
+    /** 安装阶段把应用配置中的占位符替换为随机秘钥，保留已生成的真实秘钥。 */
+    public static function generateSecrets(): void
+    {
+        $file = self::configFile();
+        if ($file === null || !is_file($file)) {
+            return;
+        }
+        $content = file_get_contents($file);
+        if (!is_string($content)) {
+            return;
+        }
+
+        $replacements = [];
+        if (str_contains($content, self::ACCESS_PLACEHOLDER)) {
+            $replacements[self::ACCESS_PLACEHOLDER] = self::secret('access');
+        }
+        if (str_contains($content, self::REFRESH_PLACEHOLDER)) {
+            $replacements[self::REFRESH_PLACEHOLDER] = self::secret('refresh');
+        }
+        if ($replacements !== []) {
+            self::writeReplacements($file, $content, $replacements);
+        }
+    }
+
     private static function read(): array
     {
         if (function_exists('config')) {
@@ -57,14 +81,9 @@ final class ConfigLoader
             return $config;
         }
 
-        if (!isset(self::$generated['access'])) {
-            self::$generated['access'] = self::generateSecret();
-            self::$generated['refresh'] = self::generateSecret();
-        }
-
         $generated = [
-            self::ACCESS_PLACEHOLDER => self::$generated['access'],
-            self::REFRESH_PLACEHOLDER => self::$generated['refresh'],
+            self::ACCESS_PLACEHOLDER => self::secret('access'),
+            self::REFRESH_PLACEHOLDER => self::secret('refresh'),
         ];
 
         self::persist($generated);
@@ -78,6 +97,14 @@ final class ConfigLoader
         $config['jwt'] = $jwt;
 
         return $config;
+    }
+
+    private static function secret(string $slot): string
+    {
+        if (!isset(self::$generated[$slot])) {
+            self::$generated[$slot] = self::generateSecret();
+        }
+        return self::$generated[$slot];
     }
 
     private static function generateSecret(): string
@@ -117,6 +144,12 @@ final class ConfigLoader
             return;
         }
 
+        self::writeReplacements($file, $content, $replacements);
+    }
+
+    /** @param array<string, string> $replacements */
+    private static function writeReplacements(string $file, string $content, array $replacements): void
+    {
         $updated = str_replace(array_keys($replacements), array_values($replacements), $content);
         if ($updated !== $content) {
             file_put_contents($file, $updated, LOCK_EX);
