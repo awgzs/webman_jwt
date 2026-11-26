@@ -18,13 +18,6 @@ composer require melo/jwt
 
 ## 配置
 
-复制配置目录到 Webman 应用的 `config/` 下，最终路径为 `config/plugin/melo/jwt/app.php`（通过 `config('plugin.melo.jwt.app')` 读取）：
-
-```bash
-mkdir -p config/plugin/melo
-cp -r vendor/melo/jwt/config/plugin/melo/jwt config/plugin/melo/
-```
-
 秘钥占位符会在首次加载配置时自动替换为 64 位随机值并写回 `config/plugin/melo/jwt/app.php`，无需手动生成。若应用侧尚未复制配置模板，首次使用时会自动创建目录与配置文件。
 
 > 密钥长度要求（firebase/php-jwt v7）：HS256 ≥ 32 字节、HS384 ≥ 48 字节、HS512 ≥ 64 字节。
