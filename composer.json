@@ -1,0 +1,32 @@
+{
+    "name": "melo/jwt",
+    "description": "A production-ready JWT authentication package for Webman / Workerman.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "webman",
+        "workerman",
+        "jwt",
+        "authentication",
+        "token"
+    ],
+    "require": {
+        "php": ">=8.0",
+        "firebase/php-jwt": "^7.0"
+    },
+    "suggest": {
+        "ext-redis": "Required when using the redis blacklist or redis sso driver.",
+        "topthink/think-orm": "Required when using the mysql sso driver."
+    },
+    "autoload": {
+        "psr-4": {
+            "Melo\\Jwt\\": "src/"
+        },
+        "files": [
+            "src/helper.php"
+        ]
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
