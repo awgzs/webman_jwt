@@ -46,7 +46,7 @@ class Jwt
      * @param array    $extend      业务字段（含 id / client 时纳入单设备登录）
      * @param int|null $accessExp   覆盖 access 有效期
      * @param int|null $refreshExp  覆盖 refresh 有效期
-     * @return array{token_type: string, expires_in: int, access_token: string, refresh_token?: string, refresh_expires_in?: int}
+     * @return array{token_type: string, access_expires_in: int, access_token: string, refresh_token?: string, refresh_expires_in?: int}
      */
     public function encode(array $extend, ?int $accessExp = null, ?int $refreshExp = null): array
     {
@@ -56,7 +56,7 @@ class Jwt
 
         $tokens = [
             'token_type' => 'Bearer',
-            'expires_in' => $accessExp,
+            'access_expires_in' => $accessExp,
             'access_token' => $this->issue($extend, $accessExp, $jti, self::TYPE_ACCESS),
         ];
 
@@ -67,7 +67,7 @@ class Jwt
 
         $this->registerSso($extend, $jti, max($accessExp, $refreshExp));
 
-        return $tokens;
+        return $this->mapResponseFields($tokens);
     }
 
     private function issue(array $extend, int $exp, string $jti, string $type): string
@@ -150,7 +150,7 @@ class Jwt
     /**
      * @param string|null $refreshToken 不传则从请求头获取
      * @param array       $extend       引用返回业务字段
-     * @return array{token_type: string, expires_in: int, access_token: string, refresh_token?: string, refresh_expires_in?: int}
+     * @return array{token_type: string, access_expires_in: int, access_token: string, refresh_token?: string, refresh_expires_in?: int}
      */
     public function refreshToken(?string $refreshToken = null, array &$extend = []): array
     {
@@ -163,7 +163,7 @@ class Jwt
 
         $tokens = [
             'token_type' => 'Bearer',
-            'expires_in' => $accessExp,
+            'access_expires_in' => $accessExp,
             'access_token' => $this->issue($extend, $accessExp, $jti, self::TYPE_ACCESS),
         ];
 
@@ -174,7 +174,7 @@ class Jwt
 
         $this->registerSso($extend, $jti, max($accessExp, $refreshExp));
 
-        return $tokens;
+        return $this->mapResponseFields($tokens);
     }
 
     /** 不传 client 则退出该用户全部设备。 */
@@ -455,6 +455,22 @@ class Jwt
     private function jwt(string $key, mixed $default = null): mixed
     {
         return $this->config['jwt'][$key] ?? $default;
+    }
+
+    /** 按 response_fields 映射签发结果的字段名，未列出的键保持原样。 */
+    private function mapResponseFields(array $tokens): array
+    {
+        $map = $this->config['response_fields'] ?? [];
+        if (!is_array($map) || $map === []) {
+            return $tokens;
+        }
+
+        $mapped = [];
+        foreach ($tokens as $key => $value) {
+            $name = $map[$key] ?? $key;
+            $mapped[is_string($name) && $name !== '' ? $name : $key] = $value;
+        }
+        return $mapped;
     }
 
     private function generateJti(): string

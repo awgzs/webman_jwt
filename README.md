@@ -24,6 +24,22 @@ webman 会自动复制配置模板到 `config/plugin/melo/jwt/app.php`，已存�
 
 > 密钥长度要求（firebase/php-jwt v7）：HS256 ≥ 32 字节、HS384 ≥ 48 字节、HS512 ≥ 64 字节。
 
+### 返回前端的字段名
+
+签发结果里的字段名可通过 `response_fields` 配置，键为内部字段名，值为返回前端的字段名；未列出的字段保持原名：
+
+```php
+'response_fields' => [
+    'token_type' => 'token_type',
+    'access_token' => 'access_token',
+    'access_expires_in' => 'expires_in',      // 例如改回 expires_in
+    'refresh_token' => 'refresh_token',
+    'refresh_expires_in' => 'refresh_expires_in',
+],
+```
+
+默认把 access 有效期字段命名为 `access_expires_in`，与 `refresh_expires_in` 对称。
+
 ## 快速使用
 
 ```php
@@ -36,7 +52,7 @@ $tokens = JwtToken::generateToken([
     'email' => 'melo@example.com',
     'client' => JwtToken::TOKEN_CLIENT_WEB,
 ]);
-// ['token_type'=>'Bearer', 'expires_in'=>7200, 'access_token'=>'...', 'refresh_token'=>'...', 'refresh_expires_in'=>604800]
+// ['token_type'=>'Bearer', 'access_expires_in'=>7200, 'access_token'=>'...', 'refresh_token'=>'...', 'refresh_expires_in'=>604800]
 
 $tokens = JwtToken::generateToken(['id' => 1001], 3600, 604800); // 单次覆盖有效期
 ```

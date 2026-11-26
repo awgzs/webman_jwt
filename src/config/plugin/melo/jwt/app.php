@@ -27,7 +27,7 @@ return [
         // access token 秘钥。占位符会在首次使用时自动替换为 64 位随机值
         'access_secret_key' => '__MELO_JWT_ACCESS_SECRET__',
 
-        // access token 有效期（秒）
+        // access token 有效期（秒），签发结果中以 access_expires_in 返回
         'access_exp' => 7200,
 
         // refresh token 秘钥（必须与 access 不同）。占位符同样自动生成
@@ -74,6 +74,20 @@ return [
         // 是否允许 GET 参数传递 token（默认关闭，仅从请求头获取）
         'is_support_get_token' => false,
         'is_support_get_token_key' => 'authorization',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | 签发结果字段映射
+    |--------------------------------------------------------------------------
+    | 键为内部字段名，值为返回前端的字段名；未列出的字段按键名原样返回。
+    */
+    'response_fields' => [
+        'token_type' => 'token_type',
+        'access_token' => 'access_token',
+        'access_expires_in' => 'access_expires_in',
+        'refresh_token' => 'refresh_token',
+        'refresh_expires_in' => 'refresh_expires_in',
     ],
 
     /*
