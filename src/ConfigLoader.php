@@ -35,7 +35,7 @@ final class ConfigLoader
             }
         }
 
-        $file = dirname(__DIR__) . '/config/plugin/melo/jwt/app.php';
+        $file = __DIR__ . '/config/plugin/melo/jwt/app.php';
         if (is_file($file)) {
             $config = require $file;
             if (is_array($config)) {
@@ -112,7 +112,7 @@ final class ConfigLoader
             if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {
                 return;
             }
-            $template = dirname(__DIR__) . '/config/plugin/melo/jwt/app.php';
+            $template = __DIR__ . '/config/plugin/melo/jwt/app.php';
             if (!is_file($template) || !copy($template, $file)) {
                 return;
             }
