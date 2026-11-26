@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Melo\Jwt\Middleware;
 
+use Closure;
 use Melo\Jwt\Exception\JwtException;
 use Melo\Jwt\Exception\TokenMissingException;
-use Melo\Jwt\Facade;
+use Melo\Jwt\Jwt;
+use Melo\Jwt\JwtToken;
 use Webman\Http\Request;
 use Webman\Http\Response;
-use Closure;
 
 /**
  * JWT 认证中间件。
@@ -17,7 +18,7 @@ use Closure;
  * 在 config/middleware.php 中注册：
  *   '' => [ \Melo\Jwt\Middleware\JwtAuthMiddleware::class ],
  *
- * 认证成功后，claims 会写入请求上下文：
+ * 认证成功后，载荷会写入请求上下文：
  *   - $request->jwtClaims = [...]
  *   - context('jwt.claims', [...])（Webman 协程上下文）
  */
@@ -27,7 +28,6 @@ class JwtAuthMiddleware
     {
         $config = $this->config();
 
-        // 插件关闭或路径命中白名单，直接放行
         if (empty($config['enable']) || $this->isWhitelisted($request->path(), $config['whitelist'] ?? [])) {
             return $next($request);
         }
@@ -35,18 +35,17 @@ class JwtAuthMiddleware
         try {
             $token = $this->extractToken($request, $config['token'] ?? []);
             if ($token === null || $token === '') {
-                throw new TokenMissingException('Authorization token is required.');
+                throw new TokenMissingException('请求未携带authorization信息', 401000);
             }
 
-            $claims = Facade::guard($this->guardName($config))->decode($token);
+            $payload = JwtToken::verify(Jwt::ACCESS_TOKEN, $token);
         } catch (JwtException $e) {
-            return $this->fail($config, $e->getMessage());
+            return $this->fail($config, $e->getMessage(), $e->getCode());
         }
 
-        // 注入请求上下文，业务层可直接使用
-        $request->jwtClaims = $claims;
+        $request->jwtClaims = $payload;
         if (function_exists('context')) {
-            context('jwt.claims', $claims);
+            context('jwt.claims', $payload);
             context('jwt.token', $token ?? null);
         }
 
@@ -55,20 +54,14 @@ class JwtAuthMiddleware
 
     /**
      * 提取 token：优先取请求对象上显式传入的 token，其次取请求头。
-     *
-     * 显式传入方式：$request->withAttr('jwtToken', '<token>')，
-     * 适用于非标准入口或上游已解析出 token 的场景。
-     * 请求头默认格式：Authorization: Bearer <token>
      */
     private function extractToken(Request $request, array $tokenConfig): ?string
     {
-        // 1) 显式传入的 token
         $passed = $request->jwtToken ?? null;
         if (is_string($passed) && $passed !== '') {
             return trim($passed);
         }
 
-        // 2) 请求头
         $headerName = $tokenConfig['header'] ?? 'Authorization';
         $value = $request->header($headerName, '');
         if (!is_string($value) || $value === '') {
@@ -81,7 +74,6 @@ class JwtAuthMiddleware
             if (stripos($value, $prefixWithSpace) === 0) {
                 return trim(substr($value, strlen($prefixWithSpace)));
             }
-            // 请求头存在但前缀不匹配，视为无效
             return null;
         }
 
@@ -108,16 +100,10 @@ class JwtAuthMiddleware
         return false;
     }
 
-    private function guardName(array $config): ?string
-    {
-        $guard = $config['guard'] ?? null;
-        return is_string($guard) && $guard !== '' ? $guard : null;
-    }
-
     /**
      * 构造统一的 401 响应
      */
-    private function fail(array $config, string $message): Response
+    private function fail(array $config, string $message, int $code = 0): Response
     {
         $exceptionConfig = $config['exception'] ?? [];
         $status = (int) ($exceptionConfig['status'] ?? 401);
@@ -132,6 +118,9 @@ class JwtAuthMiddleware
             'data' => null,
         ];
         $body = is_array($body) ? $body : [];
+        if ($code > 0) {
+            $body['code'] = $code;
+        }
         $body['message'] = str_replace('{message}', $message, (string) ($body['message'] ?? '{message}'));
 
         return json($body, $status);
